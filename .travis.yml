@@ -36,6 +36,7 @@ deploy:
     script: bash scripts/deploy_openshift.sh
     on:
       branch: develop
+      branch: feature/TNE_docker_deployment
 
   - provider: script
     skip_cleanup: true
@@ -48,10 +49,4 @@ deploy:
     script: bash scripts/deploy_javadoc.sh
     on:
       tags: true
-
- - provider: script
-   skip_cleanup: true
-   script: bash scripts/deploy_openshift.sh
-   on:
-     branch: feature/TNE_docker_deployment
 
