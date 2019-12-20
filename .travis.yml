@@ -53,5 +53,5 @@ deploy:
    skip_cleanup: true
    script: bash scripts/deploy_openshift.sh
    on:
-     branch: test/TNE_docker_deployment
+     branch: TNE_docker_deployment
 
