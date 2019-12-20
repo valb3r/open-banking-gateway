@@ -10,6 +10,11 @@ script:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 
+env:
+  global:
+    - OPENSHIFT_REGISTRY="openshift-registry.adorsys.de"
+    - OPENSHIFT_NAMESPACE="open-banking-gateway-dev"
+
 deploy:
 #  -
 #    skip_cleanup: true
@@ -43,3 +48,9 @@ deploy:
     script: bash scripts/deploy_javadoc.sh
     on:
       tags: true
+
+ - provider: script
+   skip_cleanup: true
+   script: bash scripts/deploy_openshift.sh
+   on:
+     branch: feature/OBG-7_DocumentationFramework
