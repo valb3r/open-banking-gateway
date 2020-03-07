@@ -77,14 +77,14 @@ Put service parameter in a serviceSpec map for further processing.
 ### LoA-043 TppBankingApi.serviceContext
 Put all objects associated with the call into a generic ServiceContext object.
 
-### <a name="LoA-050"></a>LoA-050 BankingProtocolFacade.service
+### <a name="LoA-050"></a>LoA-050 BankingProtocolFacade.execute
 Forwards the call to the BankingProtocolFacade.
 
 ### LoA-051, -052 BankingProtocolFacade.selectBankingProtocol
 - If the serviceSessionId exists, selects the BankingProtocol based on the given serviceSessionId.
 - If the is the very first request, there is no serviceSessionId and the TppBankingApi selects the BankingProtocol based on the given: BankId and ServiceType (in this case "listOfAccounts")
 
-### <a name="LoA-060"></a>LoA-060 : BankingProtocol.service
+### <a name="LoA-060"></a>LoA-060 : BankingProtocol.execute
 The [BankingProtocol](dictionary.md#BankingProtocol) associated with the given BankProfile decides on how to proceed with the request after loading and analyzing an eventually stored TppConsentSession.
 
 ### LoA-061 : BankingProtocol.define
