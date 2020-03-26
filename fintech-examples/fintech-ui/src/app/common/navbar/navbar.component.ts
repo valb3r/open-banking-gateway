@@ -15,22 +15,18 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {}
 
   onLogout() {
-    if (this.isLoggedIn()) {
-      this.authService.logout().subscribe(
-        ok => console.log('logout ok'),
-        notok => {
-          if (notok.status === 504) {
-            this.authService.deleteAllCookies();
-            this.authService.openLoginPage();
-            console.log('server respond with 504');
-          } else {
-            console.log('logout NOT-OK');
-          }
-        }
-      );
-    } else {
-      this.router.navigate(['/login']);
-    }
+    this.authService.logout().subscribe(
+      ok => {
+        this.authService.deleteAllCookies();
+        this.authService.openLoginPage();
+        console.log('logout ok');
+      },
+      notok => {
+        this.authService.deleteAllCookies();
+        this.authService.openLoginPage();
+        console.log('server respond with 504');
+      }
+    );
   }
 
   isLoggedIn(): boolean {

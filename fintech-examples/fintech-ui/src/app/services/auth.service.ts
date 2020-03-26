@@ -30,22 +30,9 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<boolean> {
+  logout(): Observable<any> {
     console.log('start logout');
-    return this.finTechAuthorizationService.logoutPOST('', '', 'response').pipe(
-      map(
-        response => {
-          this.respStatus = response;
-          console.log('got response from server');
-          this.deleteAllCookies();
-          this.openLoginPage();
-          return response.ok;
-        },
-        error => {
-          console.error('logout with error');
-        }
-      )
-    );
+    return this.finTechAuthorizationService.logoutPOST('', '', 'response');
   }
 
   deleteAllCookies() {
