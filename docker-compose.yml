@@ -68,6 +68,7 @@ services:
       - MOCK_TPPAIS_LISTTRANSACTIONS=false
       - MOCK_TPPAIS_LISTACCOUNTS=false
 
+      - FINTECH-UI_HOST=http://localhost:24200
       - FINTECH-UI_REDIRECT-URL=http://localhost:24200/redirect-after-consent?redirectCode={redirectCode}
       - FINTECH-UI_UNAUTHORIZED-URL=http://localhost:24200/
       - FINTECH-UI_EXCEPTION-URL=http://localhost:24200/redirect-after-consent-denied
