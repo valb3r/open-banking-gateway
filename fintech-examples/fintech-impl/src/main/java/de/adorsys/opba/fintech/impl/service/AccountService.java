@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static de.adorsys.opba.fintech.impl.tppclients.Consts.COMPUTE_FINTECH_ID;
 import static de.adorsys.opba.fintech.impl.tppclients.Consts.COMPUTE_X_REQUEST_SIGNATURE;
 import static de.adorsys.opba.fintech.impl.tppclients.Consts.COMPUTE_X_TIMESTAMP_UTC;
-import static de.adorsys.opba.fintech.impl.tppclients.Consts.COMPUTE_FINTECH_ID;
 
 @Service
 @Slf4j
@@ -90,11 +90,8 @@ public class AccountService extends HandleAcceptedService {
                     null,
                     sessionEntity.getConsentConfirmed() ? sessionEntity.getServiceSessionId() : null);
         } else {
-            // FIXME: HACKETTY-HACK - force consent retrieval for transactions on ALL accounts
-            // Should be superseded and fixed with
-            // https://github.com/adorsys/open-banking-gateway/issues/303
-            accounts = tppAisClient.getTransactions(
-                    UUID.randomUUID().toString(), // As consent is missing this will be ignored
+            // FIXME
+            accounts = tppAisClient.getAccounts(
                     tppProperties.getServiceSessionPassword(),
                     sessionEntity.getLoginUserName(),
                     RedirectUrlsEntity.buildOkUrl(uiConfig, redirectCode),
@@ -106,8 +103,7 @@ public class AccountService extends HandleAcceptedService {
                     COMPUTE_FINTECH_ID,
                     bankID,
                     null,
-                    sessionEntity.getConsentConfirmed() ? sessionEntity.getServiceSessionId() : null,
-                    null, null, null, null, null);
+                    sessionEntity.getConsentConfirmed() ? sessionEntity.getServiceSessionId() : null);
         }
         return accounts;
     }
