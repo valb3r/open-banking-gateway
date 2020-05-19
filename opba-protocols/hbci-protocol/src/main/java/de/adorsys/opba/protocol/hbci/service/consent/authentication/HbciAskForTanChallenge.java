@@ -1,38 +1,35 @@
-package de.adorsys.opba.protocol.xs2a.service.xs2a.consent.authenticate.embedded;
+package de.adorsys.opba.protocol.hbci.service.consent.authentication;
 
 import de.adorsys.opba.protocol.bpmnshared.service.context.ContextUtil;
 import de.adorsys.opba.protocol.bpmnshared.service.exec.ValidatedExecution;
-import de.adorsys.opba.protocol.xs2a.context.Xs2aContext;
-import de.adorsys.opba.protocol.xs2a.service.xs2a.Xs2aRedirectExecutor;
+import de.adorsys.opba.protocol.hbci.context.HbciContext;
+import de.adorsys.opba.protocol.hbci.service.HbciRedirectExecutor;
 import lombok.RequiredArgsConstructor;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Service;
 
-import static de.adorsys.opba.protocol.xs2a.service.xs2a.consent.ConsentConst.CONSENT_FINALIZED;
-
 /**
  * Asks PSU for his SCA challenge result by redirect him to password input page. Suspends process to wait for users' input.
  */
-@Service("xs2aAskForScaChallenge")
+@Service("hbciAskForTanChallenge")
 @RequiredArgsConstructor
-public class Xs2aAskForScaChallenge extends ValidatedExecution<Xs2aContext> {
+public class HbciAskForTanChallenge extends ValidatedExecution<HbciContext> {
 
     private final RuntimeService runtimeService;
-    private final Xs2aRedirectExecutor redirectExecutor;
+    private final HbciRedirectExecutor redirectExecutor;
 
     @Override
-    protected void doRealExecution(DelegateExecution execution, Xs2aContext context) {
+    protected void doRealExecution(DelegateExecution execution, HbciContext context) {
         redirectExecutor.redirect(execution, context, redir -> redir.getParameters().getReportScaResult());
     }
 
     @Override
-    protected void doMockedExecution(DelegateExecution execution, Xs2aContext context) {
+    protected void doMockedExecution(DelegateExecution execution, HbciContext context) {
         ContextUtil.getAndUpdateContext(
             execution,
-            (Xs2aContext ctx) -> {
+            (HbciContext ctx) -> {
                 ctx.setLastScaChallenge("mock-challenge");
-                ctx.setScaStatus(CONSENT_FINALIZED);
             }
         );
         runtimeService.trigger(execution.getId());
