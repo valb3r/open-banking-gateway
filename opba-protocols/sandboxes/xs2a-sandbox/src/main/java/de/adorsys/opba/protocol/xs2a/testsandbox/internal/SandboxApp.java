@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
@@ -64,14 +65,15 @@ import static org.awaitility.Awaitility.await;
 @Getter
 public enum SandboxApp {
 
-    ONLINE_BANKING_UI("adorsys/xs2a-online-banking-ui:2.9", true), // adorsys/xs2a-online-banking-ui
-    LEDGERS_APP("ledgers-app-2.8.jar"), // adorsys/ledgers
-    LEDGERS_GATEWAY("gateway-app-5.10.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)), // adorsys/xs2a-connector-examples
-    ASPSP_PROFILE("aspsp-profile-server-5.10-exec.jar"), // adorsys/xs2a-aspsp-profile
-    CONSENT_MGMT("cms-standalone-service-5.10.jar"), // adorsys/xs2a-consent-management
-    ONLINE_BANKING("online-banking-app-2.9.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)), // adorsys/xs2a-online-banking
-    TPP_REST("tpp-rest-server-2.9.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)), // adorsys/xs2a-tpp-rest-server
-    CERT_GENERATOR("certificate-generator-2.9.jar"); // adorsys/xs2a-certificate-generator
+    //LEDGERS_APP("ledgers-app-3.4.jar"), // adorsys/ledgers
+
+    //ONLINE_BANKING_UI("adorsys/xs2a-online-banking-ui:3.7.1", true), // adorsys/xs2a-online-banking-ui
+    //LEDGERS_GATEWAY("gateway-app-7.4.1.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)); // adorsys/xs2a-connector-examples
+    //ASPSP_PROFILE("aspsp-profile-server-7.4-exec.jar"), // adorsys/xs2a-aspsp-profile
+    //CONSENT_MGMT("cms-standalone-service-7.4.jar"); // adorsys/xs2a-consent-management
+    //ONLINE_BANKING("online-banking-app-3.7.1.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)), // adorsys/xs2a-online-banking
+    //TPP_REST("tpp-rest-server-3.7.1.jar", false, ImmutableSet.of(ONLINE_BANKING_UI, LEDGERS_APP)), // adorsys/xs2a-tpp-rest-server
+    CERT_GENERATOR("certificate-generator-3.7.1.jar"); // adorsys/xs2a-certificate-generator
 
 
     public static final String SANDBOX_LOG_LEVEL = "SANDBOX_LOG_LEVEL";
@@ -412,22 +414,43 @@ public enum SandboxApp {
     private static class ClassloaderWithJar {
 
         private final String jarPath;
-        private final URLClassLoader loader;
+        private final JarFileLoader loader;
 
         @SneakyThrows
         ClassloaderWithJar(String jar) {
             jarPath = Arrays.stream(System.getProperty("java.class.path").split(System.getProperty("path.separator")))
-                    .filter(it -> it.endsWith(jar))
-                    .findAny()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "Jar " + jar + " not found on classpath: " + System.getProperty("java.class.path"))
-                    );
+                              .filter(it -> it.endsWith(jar))
+                              .findAny()
+                              .orElseThrow(() -> new IllegalStateException(
+                                      "Jar " + jar + " not found on classpath: " + System.getProperty("java.class.path"))
+                              );
 
-            loader = new URLClassLoader(
+            loader = new JarFileLoader(
                     // It makes no sense to provide anything else except Spring JAR as it will use its own classloader
                     new URL[] {Paths.get(jarPath).toUri().toURL()},
                     null
             );
+
+            loader.addFile("/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/jre/lib/rt.jar");
+            loader.loadClass("org.ietf.jgss.GSSException", true);
+            //loader.loadClass("java.sql.SQLException", true);
+        }
+    }
+
+    static class JarFileLoader extends URLClassLoader {
+
+        public JarFileLoader(URL[] urls, ClassLoader parent) {
+            super(urls, parent);
+        }
+
+        public void addFile(String path) throws MalformedURLException {
+            String urlPath = "jar:file://" + path + "!/";
+            addURL(new URL(urlPath));
+        }
+
+        @SneakyThrows
+        protected Class<?> loadClass(String name, boolean resolve) {
+            return super.loadClass(name, resolve);
         }
     }
 
