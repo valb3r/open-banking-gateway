@@ -96,4 +96,14 @@ public class BankProfile implements Serializable, CurrentBankProfile {
                 target = "scaApproaches")
         Aspsp map(BankProfile bankProfile);
     }
+
+    @Override
+    public String getBic() {
+        Bank bank = getBank();
+        if (null == bank) {
+            return null;
+        }
+
+        return bank.getBic();
+    }
 }
