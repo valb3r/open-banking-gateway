@@ -1,5 +1,5 @@
 # Builds pushes of release candidate tags
-name: Release candidate develop and testing
+name: Release candidate promotion to production
 
 on:
   push:
