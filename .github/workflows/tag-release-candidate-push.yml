@@ -4,7 +4,7 @@ name: Release candidate develop and testing
 on:
   push:
     tags:
-      - rc-.*
+      - rc-*
 
 env:
   GITHUB_USER: valb3r-adorsys

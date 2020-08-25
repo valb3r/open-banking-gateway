@@ -4,7 +4,7 @@ name: Release candidate promotion to production
 on:
   push:
     tags:
-      - v.*
+      - v*
 
 env:
   GITHUB_USER: valb3r-adorsys
