@@ -6,8 +6,8 @@
         <server>
             <!-- Maven Central Deployment -->
             <id>sonatype</id>
-            <username>${env.SONATYPE_USERNAME}</username>
-            <password>${env.SONATYPE_PASSWORD}</password>
+            <username>${env.GITHUB_USER}</username>
+            <password>${env.GITHUB_TOKEN}</password>
         </server>
         <server>
             <id>github</id>
@@ -18,9 +18,13 @@
     <profiles>
         <profile>
             <id>sonatype</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <repositories>
+                <repository>
+                    <id>sonatype</id>
+                    <name>GitHub valb3r-adorsys Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/valb3r-adorsys</url>
+                </repository>
+            </repositories>
             <properties>
                 <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
                 <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
