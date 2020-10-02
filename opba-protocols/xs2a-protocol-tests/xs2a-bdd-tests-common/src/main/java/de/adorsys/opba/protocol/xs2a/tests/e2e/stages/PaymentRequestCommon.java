@@ -128,7 +128,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                     .queryParam(REDIRECT_CODE_QUERY, fintechUserTempPassword)
                     .contentType(APPLICATION_JSON_VALUE)
                 .when()
-                    .post(PIS_ANONYMOUS_LOGIN_USER_ENDPOINT, serviceSessionId)
+                    .post(PIS_ANONYMOUS_LOGIN_USER_ENDPOINT, paymentServiceSessionId)
                 .then()
                     .statusCode(ACCEPTED.value())
                 .extract();
@@ -150,7 +150,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                      .contentType(APPLICATION_JSON_VALUE)
                      .body(ImmutableMap.of(LOGIN, username, PASSWORD, password))
                  .when()
-                    .post(PIS_LOGIN_USER_ENDPOINT, serviceSessionId)
+                    .post(PIS_LOGIN_USER_ENDPOINT, paymentServiceSessionId)
                  .then()
                      .statusCode(ACCEPTED.value())
                      .extract();
@@ -169,7 +169,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                      .contentType(APPLICATION_JSON_VALUE)
                      .body(readResource("restrecord/tpp-ui-input/params/anton-brueckner-account-all-accounts-consent.json"))
                  .when()
-                    .post(AUTHORIZE_PAYMENT_ENDPOINT, serviceSessionId)
+                    .post(AUTHORIZE_PAYMENT_ENDPOINT, paymentServiceSessionId)
                  .then()
                     .statusCode(ACCEPTED.value())
                      .extract();
@@ -187,7 +187,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                      .cookie(AUTHORIZATION_SESSION_KEY, authSessionCookie)
                      .queryParam(REDIRECT_CODE_QUERY, redirectCode)
                  .when()
-                    .get(GET_PAYMENT_AUTH_STATE, serviceSessionId)
+                    .get(GET_PAYMENT_AUTH_STATE, paymentServiceSessionId)
                  .then()
                     .statusCode(HttpStatus.OK.value())
                     .extract();
@@ -245,7 +245,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                                                             .cookie(AUTHORIZATION_SESSION_KEY, authSessionCookie)
                                                             .queryParam(REDIRECT_CODE_QUERY, redirectCode)
                                                          .when()
-                                                            .get(GET_CONSENT_AUTH_STATE, serviceSessionId)
+                                                            .get(GET_CONSENT_AUTH_STATE, paymentServiceSessionId)
                                                          .then()
                                                             .statusCode(HttpStatus.OK.value())
                                                             .extract();
@@ -265,7 +265,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
                         .contentType(APPLICATION_JSON_VALUE)
                         .body(readResource("restrecord/tpp-ui-input/params/anton-brueckner-psu-id-parameter.json"))
                 .when()
-                        .post(AUTHORIZE_PAYMENT_ENDPOINT, serviceSessionId)
+                        .post(AUTHORIZE_PAYMENT_ENDPOINT, paymentServiceSessionId)
                 .then()
                         .statusCode(UNAUTHORIZED.value())
                         .extract();
@@ -277,7 +277,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
         withPaymentInfoHeaders(ANTON_BRUECKNER)
                     .queryParam(REDIRECT_CODE_QUERY, redirectCode)
                 .when()
-                    .get(GET_PAYMENT_AUTH_STATE, serviceSessionId)
+                    .get(GET_PAYMENT_AUTH_STATE, paymentServiceSessionId)
                 .then()
                     .statusCode(UNAUTHORIZED.value())
                 .extract();
@@ -286,7 +286,7 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
     }
 
     protected void updateServiceSessionId(ExtractableResponse<Response> response) {
-        this.serviceSessionId = response.header(SERVICE_SESSION_ID);
+        this.paymentServiceSessionId = response.header(SERVICE_SESSION_ID);
     }
 
     protected void updateRedirectCode(ExtractableResponse<Response> response) {
@@ -306,5 +306,22 @@ public class PaymentRequestCommon<SELF extends PaymentRequestCommon<SELF>> exten
         assertThat(authResponse.getSinglePayment())
                 .isEqualTo(JSON_MAPPER.readValue(readResource("restrecord/tpp-ui-input/params/anton-brueckner-single-payment-response.json"),
                                                  SinglePayment.class));
+    }
+
+    protected ExtractableResponse<Response> startInitialInternalConsentAuthorization(String uriPath, String resourceData) {
+        ExtractableResponse<Response> response =
+                startInitialInternalConsentAuthorization(uriPath, resourceData, ACCEPTED);
+        updateServiceSessionId(response);
+        updateRedirectCode(response);
+
+        return response;
+    }
+
+    protected ExtractableResponse<Response> provideParametersToBankingProtocolWithBody(String uriPath, String body, HttpStatus status) {
+        return provideParametersToBankingProtocolWithBody(uriPath, body, status, paymentServiceSessionId);
+    }
+
+    protected ExtractableResponse<Response> provideGetConsentAuthStateRequest() {
+        return provideGetConsentAuthStateRequest(paymentServiceSessionId);
     }
 }

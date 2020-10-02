@@ -44,7 +44,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Slf4j
 @JGivenStage
 @SuppressWarnings("checkstyle:MethodName") // Jgiven prettifies snake-case names not camelCase
-public class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF> {
+public abstract class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF> {
     private static final String TPP_SERVER_PASSWORD_PLACEHOLDER = "%password%";
 
     public static final ObjectMapper JSON_MAPPER = new ObjectMapper()
@@ -79,6 +79,9 @@ public class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF>
     @ProvidedScenarioState
     @SuppressWarnings("PMD.UnusedPrivateField") // used by AccountListResult!
     protected String redirectNotOkUri;
+
+    @ProvidedScenarioState
+    protected String paymentServiceSessionId;
 
     @ScenarioState
     protected List<AuthViolation> violations;
@@ -124,7 +127,9 @@ public class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF>
         );
     }
 
-    protected ExtractableResponse<Response> provideParametersToBankingProtocolWithBody(String uriPath, String body, HttpStatus status) {
+    protected abstract ExtractableResponse<Response> provideParametersToBankingProtocolWithBody(String uriPath, String body, HttpStatus status);
+
+    protected ExtractableResponse<Response> provideParametersToBankingProtocolWithBody(String uriPath, String body, HttpStatus status, String serviceSessionId) {
         ExtractableResponse<Response> response = RestAssured
                 .given()
                     .header(X_REQUEST_ID, UUID.randomUUID().toString())
@@ -149,14 +154,7 @@ public class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF>
         return provideParametersToBankingProtocolWithBody(uriPath, resourceData, status);
     }
 
-    protected ExtractableResponse<Response> startInitialInternalConsentAuthorization(String uriPath, String resourceData) {
-        ExtractableResponse<Response> response =
-                startInitialInternalConsentAuthorization(uriPath, resourceData, HttpStatus.ACCEPTED);
-        updateServiceSessionId(response);
-        updateRedirectCode(response);
-
-        return response;
-    }
+    protected abstract ExtractableResponse<Response> startInitialInternalConsentAuthorization(String uriPath, String resourceData);
 
     protected void startInitialInternalConsentAuthorizationWithCookieValidation(String uriPath, String resourceData) {
         ExtractableResponse<Response> response =
@@ -216,7 +214,9 @@ public class RequestCommon<SELF extends RequestCommon<SELF>> extends Stage<SELF>
         updateRedirectCode(response);
     }
 
-    private ExtractableResponse<Response> provideGetConsentAuthStateRequest() {
+    protected abstract ExtractableResponse<Response> provideGetConsentAuthStateRequest();
+
+    protected ExtractableResponse<Response> provideGetConsentAuthStateRequest(String serviceSessionId) {
         return RestAssured
                 .given()
                     .header(X_REQUEST_ID, UUID.randomUUID().toString())
